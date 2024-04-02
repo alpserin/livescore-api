@@ -21,7 +21,7 @@ def get_country_names():
             country_names[country['id']] = country['name']
 
         # Save country names to a file
-        with open('country_names.json', 'w') as f:
+        with open('country_names.json', 'w+') as f:
             json.dump(country_names, f)
     except Exception:
         print(f"Couldn't get country data. Check your api key or the url.")
@@ -55,12 +55,17 @@ def calculate_win_percentage(team_data):
 def main():
 
     try:
+        country_names = None
 
+        # Try loading country names from JSON file
         try:
             with open('country_names.json', 'r') as f:
                 country_names = json.load(f)
         except FileNotFoundError:
             country_names = get_country_names()
+            with open('country_names.json', 'r') as f:
+                    country_names = json.load(f)
+            
 
         competition_id = 244 # ID for UEFA Champions League
         competition_data = get_competition_data(competition_id)
