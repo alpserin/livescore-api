@@ -23,12 +23,18 @@ def get_competition_data(competition_id):
     data = response.json()
     return data['data']['stages'][0]['groups']
 
+def calculate_win_percentage(team_data):
+    won = team_data['won']
+    drawn = team_data['drawn']
+    lost = team_data['lost']
+    total_matches = won + drawn + lost
+    perc = (won / total_matches) * 100
+    return perc
+
+
 
 
 def main():
-
-    print(f"{BASE_DOMAIN}")
-
     competition_id = 244 # ID for UEFA Champions League
     competition_data = get_competition_data(competition_id)
 
@@ -42,15 +48,11 @@ def main():
         for team_data in group['standings']:
             team = team_data['team']
             country_id = team['country_id']
+            
             country_name = get_country_name(country_id)
             country_team_count[country_name] += 1
-            
-            # Get win percentage
-            won = team_data['won']
-            drawn = team_data['drawn']
-            lost = team_data['lost']
-            total_matches = won + drawn + lost
-            perc = (won / total_matches) * 100
+
+            perc = calculate_win_percentage(team_data)
             country_win_perc[country_name] += perc
             country_match_count[country_name] += 1
             country_teams[country_name].append(team['name'])
