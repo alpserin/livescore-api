@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 from dotenv import load_dotenv
 from collections import defaultdict
 
@@ -8,17 +9,26 @@ KEY = os.getenv('KEY')
 SECRET = os.getenv('SECRET')
 BASE_DOMAIN = os.getenv('BASE_DOMAIN')
 
-def get_country_name(country_id):
+def get_country_names():
     try:
         path = f"{BASE_DOMAIN}" + f"/countries/list.json?&key={KEY}&secret={SECRET}"
         response = requests.get(path)
         data = response.json()
-        for i in range(len(data['data']['country'])):
-            if (int(data['data']['country'][i]['id']) == country_id):
-                return data['data']['country'][i]['name']
+
+        country_names = {}
+
+        for country in data['data']['country']:
+            country_names[country['id']] = country['name']
+
+        # Save country names to a file
+        with open('country_names.json', 'w') as f:
+            json.dump(country_names, f)
     except Exception:
         print(f"Couldn't get country data. Check your api key or the url.")
         raise Exception
+    
+def get_single_country(country_id, country_names):
+    return country_names[f'{country_id}']
 
 def get_competition_data(competition_id):
     try:
@@ -45,6 +55,13 @@ def calculate_win_percentage(team_data):
 def main():
 
     try:
+
+        try:
+            with open('country_names.json', 'r') as f:
+                country_names = json.load(f)
+        except FileNotFoundError:
+            country_names = get_country_names()
+
         competition_id = 244 # ID for UEFA Champions League
         competition_data = get_competition_data(competition_id)
 
@@ -57,7 +74,7 @@ def main():
             for team_data in group['standings']:
                 team = team_data['team']
                 country_id = team['country_id']
-                country_name = get_country_name(country_id)
+                country_name = get_single_country(country_id, country_names)
                 country_team_count[country_name] += 1
                 perc = calculate_win_percentage(team_data)
                 country_win_perc[country_name] += perc
