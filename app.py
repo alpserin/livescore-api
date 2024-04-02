@@ -6,12 +6,12 @@ from collections import defaultdict
 load_dotenv('.env')
 KEY = os.getenv('KEY')
 SECRET = os.getenv('SECRET')
+BASE_DOMAIN = os.getenv('BASE_DOMAIN')
 
-def get_competition_id():
-    return 244
+competition_id = 244 # ID for UEFA Champions League
 
 def get_country_name(id):
-    path = f"https://livescore-api.com/api-client/countries/list.json?&key={KEY}&secret={SECRET}"
+    path = f"{BASE_DOMAIN}" + f"/countries/list.json?&key={KEY}&secret={SECRET}"
     x = requests.get(path)
     x = x.json()
 
@@ -19,7 +19,7 @@ def get_country_name(id):
         if (int(x['data']['country'][i]['id']) == id):
             return x['data']['country'][i]['name']
 
-path = f"https://livescore-api.com/api-client/competitions/table.json?competition_id={get_competition_id()}&key={KEY}&secret={SECRET}"
+path = f"{BASE_DOMAIN}" + f"/competitions/table.json?competition_id={competition_id}&key={KEY}&secret={SECRET}"
 
 r = requests.get(path)
 r = r.json()
